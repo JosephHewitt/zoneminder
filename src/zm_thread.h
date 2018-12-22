@@ -20,9 +20,12 @@
 #ifndef ZM_THREAD_H
 #define ZM_THREAD_H
 
+class RecursiveMutex;
+
+
+#include "zm_config.h"
 #include <unistd.h>
 #include <pthread.h>
-#include <unistd.h>
 #ifdef HAVE_SYS_SYSCALL_H
 #include <sys/syscall.h>
 #endif // HAVE_SYS_SYSCALL_H
@@ -59,27 +62,34 @@ public:
 };
 
 class Mutex {
-friend class Condition;
+  friend class Condition;
 
-private:
-  pthread_mutex_t mMutex;
+  private:
+    pthread_mutex_t mMutex;
 
-public:
-  Mutex();
-  ~Mutex();
+  public:
+    Mutex();
+    ~Mutex();
 
-private:
-  pthread_mutex_t *getMutex() {
-    return( &mMutex );
-  }
+  private:
+    pthread_mutex_t *getMutex() {
+      return &mMutex;
+    }
 
-public:
-  int trylock();
-  void lock();
-  void lock( int secs );
-  void lock( double secs );
-  void unlock();
-  bool locked();
+  public:
+    int trylock();
+    void lock();
+    void lock( int secs );
+    void lock( double secs );
+    void unlock();
+    bool locked();
+};
+
+class RecursiveMutex : public Mutex {
+  private:
+    pthread_mutex_t mMutex;
+  public:
+    RecursiveMutex();
 };
 
 class ScopedMutex {
